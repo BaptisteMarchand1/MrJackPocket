@@ -1,12 +1,15 @@
+import java.io.IOException;
+
 public class Main {
 
-
-	public static void main(String[] args) {
-		System.out.println("\n\n   L'enquêteur remporte la partie !");
-
-		Game leJeu = new Game();
-		leJeu.play();
-
+	public static void main(String[] args) throws IOException {
+		
+		Game g = new Game();
+		g.play();
+		
 	}
-
 }
+	
+
+	
+	

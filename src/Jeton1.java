@@ -26,12 +26,7 @@ public class Jeton1 extends Jetons {
 			return "Sherlock avance de 1 ou 2 cases";
 		}
 	}
-	
-	
-	
-	
-	
-	
+
 	
 	public static Alibis piocher(LinkedList<Alibis> pile) {
 		Alibis carte = pile.pollFirst();

@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -5,16 +6,35 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
+import java.io.IOException;
 public class Game {
-	
 	District[][] plateau;
-	public static final String ANSI_RED = "\u001B[31m";
+
+	JDistrict Lestrade;
+	JDistrict Joseph;
+	JDistrict Gull;
+	JDistrict Pizer;
+	JDistrict Stealthy;
+	JDistrict Goodley;
+	JDistrict Bert;
+	JDistrict Smith;
+	JDistrict Madame;
 	
-	// Initialise les jetons
+	JDistrict SherlockI;
+	JLabel WatsonI;
+	JLabel TobiI;
+
+	JPanel centralPanel;
+	JFrame frame;
+	InterfaceG win = new InterfaceG();
 	
+	public Game() throws IOException {}
 	
-	public void play() {
+	public void play() throws IOException {
 		
 /********************** INITIALISATIONS ***********************/
 		
@@ -40,6 +60,7 @@ public class Game {
 		for (int l=0;l<3;l++) {
 			for (int c=0;c<3;c++) {
 				int index = rand.nextInt( lesDistricts.size());
+				win.listSortedSuspects.add(lesDistricts.get(index).getSuspect());
 				District carte = lesDistricts.remove(index);
 				this.plateau[l][c] = carte;
 				if (l==0 & c==0) {
@@ -59,9 +80,8 @@ public class Game {
 				}
 				
 			}
-		}
-		lesDistricts = this.initDistricts();
-
+		}	
+		
 		Enqueteurs Sherlock = new Enqueteurs(11);
 		Enqueteurs Watson = new Enqueteurs(3);
 		Enqueteurs Tobi = new Enqueteurs(7);
@@ -76,29 +96,17 @@ public class Game {
 		Jeton4 jeton4 = new Jeton4();
 		ArrayList<Integer> listJetons = initJetons();
 		
+		win.shuffleJDistricts();
 
 		int jetonChoisi = 0;
 		Scanner scanner = new Scanner(System.in);
 		int k = 0;
 		int i = 0;
 				
-
-		//System.out.println("Rouge" + ANSI_RED);
 /**************************** JEU ****************************/
 
 		this.affichePlateau(plateau, listEnqueteurs);
-		/*plateau[0][0].getSuspect();
-		plateau[0][0].retourner();
-		plateau[0][0].getId();
-		System.out.println("\n");
-
-		this.affichePlateau(plateau, listEnqueteurs);*/
-		/*lesDistricts.get(1).retourner();
-		lesDistricts.get(2).retourner();
-		lesDistricts.get(3).retourner();
-		lesDistricts.get(4).retourner();*/
-
-
+		
 		for(int tour = 1; tour < 9; tour++) {
 			
 			if (tour%2 == 1) { 				// Tour impair				
@@ -145,7 +153,6 @@ public class Game {
 			//Appel à témoins + incrémentation du sablier
 			appelATemoins(listEnqueteurs, J1, J2, lesDistricts);
 			this.affichePlateau(plateau, listEnqueteurs);
-			J2.addSabliers(1);
 			listJetons = initJetons();
 			
 			// Vérifications de la fin du jeu
@@ -162,18 +169,16 @@ public class Game {
 	}
 
 	
-	
-	
-	
-	
-	
-	
-	
 	/**************************** METHODES UTILES ****************************/
+
 	
+	
+	
+
 public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jeton2, Jeton3 jeton3, Jeton4 jeton4,
 		int jetonChoisi, Scanner scanner, int k, int i, LinkedList<Alibis> pile, Enqueteurs Sherlock, Enqueteurs Watson, Enqueteurs Tobi,
 		JoueurEnqueteur J1, JoueurJack J2, ArrayList<Enqueteurs> listEnqueteurs) {
+	
 	// Choix du jeton
 	System.out.print( "\nEnqueteur, choisissez un jeton parmi ");
 	for (k = 0; k < listJetons.size() -1; k++) {
@@ -183,7 +188,7 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 	afficheNomActions(listJetons, jeton1,jeton2,jeton3,jeton4);
 	jetonChoisi = scanner.nextInt();
 	
-// Action du jeton
+	// Action du jeton
 	switch (jetonChoisi) {
 		case 1:
 			if (jeton1.getRecto() == true) {
@@ -195,7 +200,8 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 			else {
 				System.out.println("De combien de cases voulez-vous faire avancer Sherlock ?");
 				int nbCases = scanner.nextInt();
-				jeton2.actionRecto(Watson,nbCases);
+				win.deplacementEnqueteur(win.getSherlock(), Sherlock, nbCases);
+				jeton2.actionRecto(Sherlock,nbCases);
 				System.out.println("Sherlock avance de " + nbCases + " cases");
 			}
 			listJetons.remove(listJetons.indexOf(1));
@@ -205,6 +211,7 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 			if (jeton2.getRecto() == true) {
 				System.out.println("De combien de cases voulez-vous faire avancer Watson ?");
 				int nbCases = scanner.nextInt();
+				win.deplacementEnqueteur(win.getWatson(), Watson, nbCases);
 				jeton2.actionRecto(Watson,nbCases);
 				System.out.println("Watson avance de " + nbCases + " cases");
 			}
@@ -212,6 +219,7 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 			else {
 				System.out.println("De combien de cases voulez-vous faire avancer Tobi ?");
 				int nbCases = scanner.nextInt();
+				win.deplacementEnqueteur(win.getTobi(), Tobi, nbCases);
 				jeton2.actionVerso(Tobi,nbCases);
 				System.out.println("Tobi avance de " + nbCases +" cases");
 			}
@@ -226,8 +234,13 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 
 				System.out.println( "Choisissez l'orientation du mur : " );
 	            int nouveauMur = scanner.nextInt();
-
-				jeton3.actionRecto(plateau, p/10, p%10, nouveauMur);
+	            
+				win.rotation(win.jdistricts.get(6 + 5*(p/10) + p%10), (nouveauMur - plateau[p/10][p%10].getMur() + 4) %4);
+				
+				jeton3.actionRecto(plateau, p/10, p%10, nouveauMur);  // p/10 = ligne 	p%10 = colonne
+				
+				
+				plateau[p/10][p%10].getSuspect();
 			}
 			
 			else {		
@@ -236,7 +249,8 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 
 				System.out.println( "Choisissez la ligne et la colonne du 2nd district à échanger (LigneColonne) : " );
 	            int p2 = scanner.nextInt();
-
+	            
+	            win.permutation(6 + 5*(p1/10) + p1%10, 6 + 5*(p2/10) + p2%10);
 				jeton3.actionVerso(plateau, p1/10, p1%10, p2/10, p2%10);
 			}
 			listJetons.remove(listJetons.indexOf(3));
@@ -250,13 +264,26 @@ public void actionEnqueteur (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton
 				System.out.println( "Choisissez l'orientation du mur : " );
 	            int nouveauMur = scanner.nextInt();
 
+				win.rotation(win.jdistricts.get(6 + 5*(p/10) + p%10), (nouveauMur - plateau[p/10][p%10].getMur() + 4) %4);
 				jeton4.actionRecto(plateau, p/10, p%10, nouveauMur);
 			}
 			
 			else {				
 				System.out.println( "Choisissez l'enquêteur à déplacer d'une case :\n1 : Sherlock\n2 : Watson\n3: Tobi\n" );
 	            int enq = scanner.nextInt();
-
+	            switch (enq) {
+	            	case 1:
+	    				win.deplacementEnqueteur(win.getSherlock(), Sherlock, 1);
+	    				break;
+	            	case 2:
+	    				win.deplacementEnqueteur(win.getWatson(), Watson, 1);
+	    				break;
+	            	case 3:
+	            		System.out.println("Tobi");
+	    				win.deplacementEnqueteur(win.getTobi(), Tobi, 1);
+	    				break;
+	            }
+	            
 				jeton1.actionVerso(listEnqueteurs.get(enq-1),1);
 			}
 			listJetons.remove(listJetons.indexOf(4));
@@ -293,6 +320,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			else {
 				System.out.println("De combien de cases voulez-vous faire avancer Sherlock ?");
 				int nbCases = scanner.nextInt();
+				win.deplacementEnqueteur(win.getSherlock(), Sherlock, nbCases);
 				jeton2.actionRecto(Watson,nbCases);
 				System.out.println("Sherlock avance de " + nbCases + " cases");
 			}
@@ -303,6 +331,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			if (jeton2.getRecto() == true) {
 				System.out.println("De combien de cases voulez-vous faire avancer Watson ?");
 				int nbCases = scanner.nextInt();
+				win.deplacementEnqueteur(win.getWatson(), Watson, nbCases);
 				jeton2.actionRecto(Watson,nbCases);
 				System.out.println("Watson avance de " + nbCases + " cases");
 			}
@@ -310,6 +339,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			else {
 				System.out.println("De combien de cases voulez-vous faire avancer Tobi ?");
 				int nbCases = scanner.nextInt();
+				win.deplacementEnqueteur(win.getTobi(), Tobi, nbCases);
 				jeton2.actionVerso(Tobi,nbCases);
 				System.out.println("Tobi avance de " + nbCases +" cases");
 			}
@@ -323,7 +353,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 
 				System.out.println( "Choisissez l'orientation du mur : " );
 	            int nouveauMur = scanner.nextInt();
-
+	            
 				jeton3.actionRecto(plateau, p/10, p%10, nouveauMur);
 			}
 			
@@ -333,7 +363,8 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 
 				System.out.println( "Choisissez la ligne et la colonne du 2nd district à échanger (LigneColonne) : " );
 	            int p2 = scanner.nextInt();
-
+	            
+	            win.permutation(6 + 5*(p1/10) + p1%10, 6 + 5*(p2/10) + p2%10);
 				jeton3.actionVerso(plateau, p1/10, p1%10, p2/10, p2%10);
 			}
 			listJetons.remove(listJetons.indexOf(3));
@@ -356,7 +387,21 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 	            
 				System.out.println( "De combien de cases ? 0 ou 1 \n" );
 	            int nbCases = scanner.nextInt();
-				jeton1.actionVerso(listEnqueteurs.get(enq-1),nbCases);
+	            
+	            switch (enq) {
+            		case 1:
+            			win.deplacementEnqueteur(win.getSherlock(), Sherlock, nbCases);
+            			break;
+            		case 2:
+            			win.deplacementEnqueteur(win.getWatson(), Watson, nbCases);
+            			break;
+            		case 3:
+            			System.out.println("Tobi");
+            			win.deplacementEnqueteur(win.getTobi(), Tobi, nbCases);
+            			break;
+	            
+	            }
+	            jeton1.actionVerso(listEnqueteurs.get(enq-1),nbCases);
 
 			}
 			listJetons.remove(listJetons.indexOf(4));
@@ -370,6 +415,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 		int j;			// Ligne à vérifier
 		for (int i = 0 ; i < 3 ; i++) {  // Itération sur chaque enqueteur
 			switch (listEnqueteurs.get(i).getPosition()) { 		// Switch selon la position de chaque enqueteur
+			
 			
 				// Lorsque l'enqueteur se trouve à droite du plateau :
 				case 0: case 1: case 2:
@@ -466,7 +512,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			} 	// fin du switch
 		}
 		if (visibles.contains(J2.getCoupable())) {
-			System.out.println("Jack est visible ! \n");
+			//Mister Jack est visible
 			for (int p = 0 ; p < lesDistricts.size() ; p++) {
 				if (!visibles.contains(lesDistricts.get(p).getSuspect())) {
 					String a = lesDistricts.get(p).getSuspect(); 		// Nom du district à retourner
@@ -482,7 +528,7 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			
 		}
 		else {
-			System.out.println("Jack est invisible ! \n");
+			//Mister Jack est invisible
 			for (int p = 0 ; p < lesDistricts.size() ; p++) {
 				if (visibles.contains(lesDistricts.get(p).getSuspect())) {
 					String a = lesDistricts.get(p).getSuspect();
@@ -519,19 +565,16 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			
 			for (int c=0;c<3;c++) {
 				District carte = this.plateau[l][c];
-				// Ouest est vide si Nord = 3(230)
 				if (carte.mur == 3) {
 					System.out.print(" ");
 				} else {
 					System.out.print("#");
 				}
-				// centre de la carte: suspect ou vide
 				if (carte.vide) {
 					System.out.print("+");				// Caractère des personnages innocentés
 				} else {
 					System.out.print(carte.id);
 				}
-				// Est est vide si Nord = 1(012)
 				if (carte.mur == 1) {
 					System.out.print(" ");
 				} else {
@@ -542,7 +585,6 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 			System.out.println();
 			for (int c=0;c<3;c++) {
 				District carte = this.plateau[l][c];
-				// Sud est vide si Nord = 2(301)
 				if (carte.mur == 2) {
 					System.out.print("   ");
 				} else {
@@ -576,9 +618,10 @@ public void actionJack (ArrayList<Integer> listJetons, Jeton1 jeton1, Jeton2 jet
 		listDistricts.add( new District("Madame", "M"));
 		listDistricts.add( new District("Sgt Goodley", "G"));
 		listDistricts.add( new District("William Gull", "W"));
-		//Collections.shuffle(listDistricts);
 		return listDistricts;
 	}
+	
+	
 	
 	public void afficheNomActions(ArrayList<Integer> listJetons, Jetons jeton1,Jeton2 jeton2,Jeton3 jeton3,Jeton4 jeton4) {
 		for (int i = 0; i < listJetons.size(); i++) {
